@@ -15,21 +15,64 @@
 - `DCR` 由界面输入框直接填写
 - 按测试条件自动命名并导出 CSV
 
+## 仓库说明
+
+本仓库 **不包含** Swabian `Time Tagger` 驱动、安装包、离线文档和 `Time Tagger Lab` 软件文件。这些内容请从 Swabian Instruments 官网下载后，放到项目本地的 `Time Tagger/` 目录中使用。
+
+这样做的目的是：
+
+- 降低仓库体积
+- 避免分发第三方软件包带来的合规风险
+- 让驱动版本由使用者自行控制
+
 ## 运行环境
 
-- Windows
+- Windows 10/11 x64
 - Python 3.10+
 - 已安装或可用的 Python 包：
   - `PyQt5`
   - `numpy`
   - `matplotlib`
-- 可用的 Swabian `Time Tagger` 驱动文件
+- 可用的 Swabian `Time Tagger` 软件包
 
-仓库中已包含 `Time Tagger` 目录，程序启动时会自动尝试从以下位置加载驱动资源：
+## 从 Swabian 官网下载驱动和软件
+
+官方来源：
+
+- 下载页：
+  `https://www.swabianinstruments.com/time-tagger/downloads/`
+- 安装说明：
+  `https://www.swabianinstruments.com/static/documentation/TimeTagger/gettingStarted/installation.html`
+
+我刚才核对的是 Swabian 官方页面。该页面在 `2026-03-26` 标注了 `Time Tagger 2.21.2`，并提供 Windows 安装包下载。
+
+建议下载流程：
+
+1. 打开 Swabian 官方下载页
+2. 在 `Time Tagger Series - Software` 中选择 `Windows`
+3. 下载并安装官方软件包
+4. 将本项目运行所需内容放到项目根目录下的 `Time Tagger/` 中
+
+本程序启动时会从以下位置查找资源：
 
 - `Time Tagger/driver/python`
 - `Time Tagger/driver/x64` 或 `Time Tagger/driver/x86`
 - `Time Tagger/driver/firmware`
+
+如果你直接使用官方安装目录，也可以手动把所需子目录复制到本项目的 `Time Tagger/` 下。
+
+目标结构示例：
+
+```text
+Time Tagger/
+├─ driver/
+│  ├─ firmware/
+│  ├─ python/
+│  ├─ x64/
+│  └─ x86/
+├─ documentation/
+└─ Time Tagger Lab/
+```
 
 ## 快速开始
 
@@ -39,13 +82,18 @@
 pip install PyQt5 numpy matplotlib
 ```
 
-2. 在项目根目录启动程序
+2. 准备本地 `Time Tagger` 软件目录
+
+- 按上面的官方链接下载 Swabian 软件包
+- 将所需目录放到项目根目录 `Time Tagger/`
+
+3. 启动程序
 
 ```powershell
 python TDC_SPAD_Analyzer.py
 ```
 
-3. 在界面中完成以下流程
+4. 在界面中完成以下流程
 
 - 选择 `Start` / `Stop` 通道
 - 设置阈值、甄别方向、`TDC` 死时间
@@ -163,16 +211,16 @@ CSV 中同时包含：
 
 ```text
 .
+├─ .gitignore
 ├─ README.md
 ├─ TDC_SPAD_Analyzer.py
 └─ Time Tagger/
-   ├─ driver/
-   ├─ documentation/
-   └─ Time Tagger Lab/
+   └─ README.md
 ```
 
 ## 说明
 
 - `TDC-analysis.py` 已从仓库跟踪中移除，并被加入 `.gitignore`
+- `Time Tagger` 软件包文件不再纳入仓库跟踪
 - 测量过程中可以手动停止，停止后会保留当前已采集到的数据
 - 如果 `TimeTagger` 库未成功加载，程序仍可启动，但硬件连接功能不可用

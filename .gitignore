@@ -35,3 +35,7 @@ Temp*.csv
 
 # Local analysis script kept out of the shared repo
 TDC-analysis.py
+
+# Swabian Time Tagger software package is downloaded locally, not tracked
+Time Tagger/*
+!Time Tagger/README.md
