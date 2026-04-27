@@ -103,7 +103,8 @@ class TDCSPADAnalyzer(QMainWindow):
         self.app = 0
         self.dcr = 0
         self.jitter = 0
-        
+        self.save_dir = ""
+
         # 初始化UI
         self.init_ui()
         
@@ -588,11 +589,34 @@ QPushButton#PrimaryButton:pressed {
         layout.addWidget(QLabel("门幅:"), 2, 0)
         self.gate_edit = QLineEdit("1.0")
         layout.addWidget(self.gate_edit, 2, 1)
-        
+
+        layout.addWidget(QLabel("保存路径:"), 3, 0)
+        path_layout = QHBoxLayout()
+        path_layout.setContentsMargins(0, 0, 0, 0)
+        path_layout.setSpacing(8)
+
+        self.save_dir_edit = QLineEdit("未设置")
+        self.save_dir_edit.setReadOnly(True)
+        path_layout.addWidget(self.save_dir_edit)
+
+        self.select_path_btn = QPushButton("选择路径")
+        self.select_path_btn.clicked.connect(self.select_save_directory)
+        path_layout.addWidget(self.select_path_btn)
+
+        layout.addLayout(path_layout, 3, 1)
+
         group.setLayout(layout)
         self.decorate_group(group, layout)
         return group
-        
+
+    def select_save_directory(self):
+        """手动选择默认保存目录"""
+        initial_dir = self.save_dir if self.save_dir else os.path.expanduser("~")
+        selected_dir = QFileDialog.getExistingDirectory(self, "选择保存路径", initial_dir)
+        if selected_dir:
+            self.save_dir = selected_dir
+            self.save_dir_edit.setText(selected_dir)
+
     def create_button_group(self):
         """操作按钮组"""
         group = QGroupBox("操作")
@@ -1138,18 +1162,29 @@ QPushButton#PrimaryButton:pressed {
             # 格式化文件名
             date_str = datetime.now().strftime("%Y%m%d")
             filename = f"Temp{temp}-Bias{bias}-Gate{gate}-DCR{self.dcr:.0f}-PDE{self.pde:.2f}-APP{self.app:.2f}-{date_str}.csv"
-            
-            # 选择保存路径
-            save_path, _ = QFileDialog.getSaveFileName(
-                self,
-                "保存数据",
-                filename,
-                "CSV文件 (*.csv)"
-            )
-            
-            if not save_path:
-                return
-                
+
+            # 未设置路径时弹窗选择目录
+            if not self.save_dir or not os.path.isdir(self.save_dir):
+                initial_dir = os.path.expanduser("~")
+                selected_dir = QFileDialog.getExistingDirectory(self, "选择保存路径", initial_dir)
+                if not selected_dir:
+                    return
+                self.save_dir = selected_dir
+                self.save_dir_edit.setText(selected_dir)
+
+            save_path = os.path.join(self.save_dir, filename)
+
+            if os.path.exists(save_path):
+                reply = QMessageBox.question(
+                    self,
+                    "文件已存在",
+                    f"文件已存在，是否覆盖？\n{save_path}",
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.No
+                )
+                if reply != QMessageBox.Yes:
+                    return
+
             # 元数据按列写入，避免值中出现换行，并保持PDE/APP统一为 key=value 格式
             metadata_row = [
                 f"BinWidth={self.binwidth_edit.text()}ps",
